@@ -31,18 +31,14 @@ class RowsEvent(BinLogEvent):
 
         # Additional information
         try:
-            self.primary_key = table_map[self.table_id].data["primary_key"]
-            self.schema = self.table_map[self.table_id].schema
-            self.table = self.table_map[self.table_id].table
+            table = self.table_map[self.table_id]
         except KeyError:  # If we have filter the corresponding TableMap Event
             self._processed = False
-            logging.log(
-                logging.WARN,
-                """
-                  A pymysql.OperationalError error occurred, causing a fake rotate event and initialization of the table_map
-                """,
-            )
             return
+
+        self.primary_key = table.data["primary_key"]
+        self.schema = table.schema
+        self.table = table.table
 
         if self.__only_tables is not None and self.table not in self.__only_tables:
             self._processed = False

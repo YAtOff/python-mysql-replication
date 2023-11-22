@@ -593,6 +593,11 @@ class BinLogStreamReader(object):
                     pkt = self._stream_connection._read_packet()
             except pymysql.OperationalError as error:
                 code, message = error.args
+                logging.log(
+                    logging.WARNING,
+                    "A pymysql.OperationalError error occurred; code: %d; message: %s",
+                    code, message
+                )
                 if code in MYSQL_EXPECTED_ERROR_CODES:
                     self._stream_connection.close()
                     self.__connected_stream = False
@@ -636,6 +641,7 @@ class BinLogStreamReader(object):
                 # again for each logfile which is potentially wasted effort but we can't really do much better
                 # without being broken in restart case
                 self.table_map = {}
+                logging.log(logging.INFO, "Binlog rotated; table map invalidated")
             elif binlog_event.log_pos:
                 self.log_pos = binlog_event.log_pos
 
